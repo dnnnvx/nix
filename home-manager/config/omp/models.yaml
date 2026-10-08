@@ -1,0 +1,29 @@
+providers:
+  omlx:
+    type: openai
+    api: openai-completions
+    baseUrl: "http://localhost:8000/v1"
+    apiKey: "dummy"
+    discovery:
+      type: "openai-models-list"
+
+    models:
+      - id: "Qwen3-VL-4B-Instruct-MLX-4bit"
+        name: "Qwen 3 4B (MLX 4bit)"
+        contextWindow: 32768
+        maxTokens: 8192
+
+      - id: "Qwen3.5-9B-MLX-4bit"
+        name: "Qwen 3.5 9B (oMLX)"
+        contextWindow: 32768
+        maxTokens: 8192
+
+      - id: "Qwen2.5-Coder-7B-Instruct-MLX-4bit"
+        name: "Qwen 2.5 Coder 7B (oMLX)"
+        contextWindow: 12288
+        maxTokens: 4096
+
+      - id: "Ornith-1.5-9B-oQ4e-mtp"
+        name: "Ornith 1.5 9B (oQ4e mtp)"
+        contextWindow: 8192
+        maxTokens: 4096
