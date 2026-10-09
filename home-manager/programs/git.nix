@@ -3,6 +3,7 @@
     enable = true;
     settings = {
       gpg.ssh.allowedSignersFile = "~/.ssh/allowed_signers";
+      init.defaultBranch = "main";
       user = {
         name = "dnnnvx";
         email = "marco.destefani@proton.me";
