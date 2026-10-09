@@ -27,5 +27,9 @@
       "asyar"
       "gortex"
     ];
+
+    brews = [
+      "kubectl-radar"
+    ];
   };
 }
