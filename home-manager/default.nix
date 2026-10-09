@@ -21,6 +21,9 @@ in
     CLICOLOR = 1;
   };
 
+  # binaries installed via `cargo install`
+  home.sessionPath = [ "$HOME/.cargo/bin" ];
+
   home.packages = with pkgs; [
     nixfmt-tree
     htop
@@ -43,6 +46,7 @@ in
     yazi
     git-extras
     lazygit
+    rustup
     inputs.pi.packages.${system}.default
     inputs.oh-my-pi.packages.${system}.default
   ];
