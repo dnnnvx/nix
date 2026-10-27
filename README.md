@@ -15,13 +15,13 @@
 First install (`darwin-rebuild` isn't on the PATH yet):
 
 ```sh
-nix run nix-darwin -- switch --flake ~/.config/nix
+sudo nix run nix-darwin -- switch --flake ~/.config/nix
 ```
 
 Afterwards:
 
 ```sh
-darwin-rebuild switch --flake ~/.config/nix
+sudo darwin-rebuild switch --flake ~/.config/nix
 ```
 
 Build without activating (output lands in `./result`), useful to check that the config evaluates:
