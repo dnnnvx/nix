@@ -47,6 +47,7 @@ in
     git-extras
     lazygit
     rustup
+    podman # run `podman machine init && podman machine start` once to create the VM
     inputs.pi.packages.${system}.default
     inputs.oh-my-pi.packages.${system}.default
   ];
