@@ -9,6 +9,7 @@ in
   imports = [
     ./programs/git.nix
     ./programs/helix.nix
+    ./programs/kubectl.nix
     ./programs/ssh.nix
     ./programs/starship.nix
     ./programs/tmux.nix
