@@ -19,6 +19,10 @@
         name = "zzet/tap";
         trusted = true;
       }
+      {
+        name = "SableClient/sable";
+        trusted = true;
+      }
     ];
 
     casks = [
@@ -26,6 +30,7 @@
       "claude-code@latest"
       "asyar"
       "gortex"
+      "sable"
     ];
 
     brews = [
