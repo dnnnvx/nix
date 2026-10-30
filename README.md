@@ -1,41 +1,38 @@
 # Nix config
 
-[nix-darwin](https://github.com/LnL7/nix-darwin) + [home-manager](https://github.com/nix-community/home-manager) flake for personal Mac setup (Apple Silicon, `aarch64-darwin`).
+Personal Apple Silicon Mac setup declared with [nix-darwin](https://github.com/LnL7/nix-darwin), [home-manager](https://github.com/nix-community/home-manager) and [nix-homebrew](https://github.com/zhaofengli/nix-homebrew).
 
-## Layout
+## Structure
 
-| Path | Purpose |
-| --- | --- |
-| `flake.nix` | Inputs (nixpkgs-unstable, nix-darwin, home-manager, nix-homebrew, pi, oh-my-pi) and the `darwinConfigurations` output |
-| `systems/marco/` | System-level (nix-darwin) config: environment, Homebrew, SSH, macOS defaults |
-| `home-manager/` | User-level config: packages and per-program modules in `programs/` (git, helix, ssh, starship, tmux, zed, zsh) |
-
-## Usage
-
-First install (`darwin-rebuild` isn't on the PATH yet):
-
-```sh
-sudo nix run nix-darwin -- switch --flake ~/.config/nix
+```
+flake.nix             inputs and the Marcos-MacBook-Pro system
+systems/marco/        system config: environment, Homebrew, SSH, macOS defaults
+home-manager/         user packages
+  programs/           per-program modules (git, helix, kubectl, zsh, ...)
+  config/             raw config files (helix, omp)
 ```
 
-Afterwards:
+## Commands
 
 ```sh
+# Apply
+sudo nix run nix-darwin -- switch --flake ~/.config/nix   # first install only
 sudo darwin-rebuild switch --flake ~/.config/nix
-```
 
-Build without activating (output lands in `./result`), useful to check that the config evaluates:
+# Check without activating
+darwin-rebuild build --flake ~/.config/nix
 
-```sh
-nix build .#darwinConfigurations.Marcos-MacBook-Pro.system
-```
+# Update
+nix flake update                # all inputs
+nix flake update home-manager   # one input
 
-Other handy commands:
-
-```sh
-nix flake update                 # bump all inputs (rewrites flake.lock)
-nix flake update home-manager    # bump a single input
-nix fmt                          # format all .nix files (nixfmt-tree)
+# Roll back
 darwin-rebuild --list-generations
-darwin-rebuild switch --rollback # go back to the previous generation
+sudo darwin-rebuild switch --rollback
+
+# Maintain
+nix fmt                         # format .nix files
+sudo nix-collect-garbage -d     # delete old generations
 ```
+
+Homebrew runs with `cleanup = "zap"`, so anything not listed in `systems/marco/settings/homebrew.nix` is removed on switch.
