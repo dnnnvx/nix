@@ -94,7 +94,7 @@
         ];
       };
 
-      # Deployed from the Mac: nixos-rebuild switch --flake .#<name> --target-host marco@<name>.local --sudo
+      # Deployed from the Mac: nixos-rebuild switch --flake .#<name> --target-host marco@<name>.local.casasulgorgo.net --sudo
       nixosConfigurations = {
         rpi-1 = mkRpi ./systems/rpi/hosts/rpi-1.nix;
       };

@@ -45,22 +45,20 @@ The Mac builds each Pi's system with its Linux builder (`nix.linux-builder`) and
 
 To add a Pi, copy `hosts/rpi-1.nix` with a new hostname and add it to `nixosConfigurations` in `flake.nix`. The examples below use `rpi-1`.
 
-Each Pi has a static IP, `rpi.address` in its host file (`rpi-N` → `192.168.0.11N`, outside the router's DHCP pool), and a matching `rpi-N.local.casasulgorgo.net` record in the infra repo (tofu `local_hosts`). Leave `rpi.address` unset for DHCP. `rpi-N.local` (mDNS) works either way.
+Each Pi has a static IP, `rpi.address` in its host file (`rpi-N` → `192.168.0.11N`, outside the router's DHCP pool), and a matching `rpi-N.local.casasulgorgo.net` record in the infra repo (tofu `local_hosts`). Leave `rpi.address` unset for DHCP.
 
 ```sh
 # Deploy
-nixos-rebuild switch --flake .#rpi-1 --target-host marco@rpi-1.local --sudo
+nixos-rebuild switch --flake .#rpi-1 --target-host marco@rpi-1.local.casasulgorgo.net --sudo
 
 # Try a change without touching the boot default; a reboot undoes it
-nixos-rebuild test --flake .#rpi-1 --target-host marco@rpi-1.local --sudo
+nixos-rebuild test --flake .#rpi-1 --target-host marco@rpi-1.local.casasulgorgo.net --sudo
 
 # Roll back
-ssh marco@rpi-1.local sudo nixos-rebuild switch --rollback
+ssh marco@rpi-1.local.casasulgorgo.net sudo nixos-rebuild switch --rollback
 ```
 
 ### Flashing a new Pi
-
-Needs `systems/rpi/secrets.yaml` (see Wi-Fi) and every new file added to git, since flakes only see tracked files.
 
 ```sh
 HOST=rpi-1
@@ -69,7 +67,7 @@ HOST=rpi-1
 nix build .#nixosConfigurations.$HOST.config.system.build.sdImage
 nix shell nixpkgs#zstd -c zstd -d result/sd-image/*.img.zst -o $HOME/Downloads/$HOST.img
 
-# Find the card by its size. Check twice: dd overwrites whatever disk it's given
+# Find the card (by its size)
 diskutil list
 DISK=disk4
 diskutil unmountDisk /dev/$DISK
@@ -81,7 +79,7 @@ diskutil eject /dev/$DISK
 rm $HOME/Downloads/$HOST.img
 ```
 
-The first boot expands the filesystem and joins Wi-Fi in a minute or two; then `ssh marco@$HOST.local`.
+The first boot expands the filesystem and joins Wi-Fi in a minute or two; then `ssh marco@$HOST.local.casasulgorgo.net`.
 
 ### Wi-Fi
 
@@ -102,26 +100,26 @@ wifi: |
 
 ### Mic stream
 
-The Pi only captures the mic and serves it as `rtsp://rpi-1.local:8554/mic`; BirdNET-Go runs on the cluster and reads that stream. The Pi keeps no state, so reflashing loses nothing.
+The Pi only captures the mic and serves it as `rtsp://rpi-1.local.casasulgorgo.net:8554/mic`; BirdNET-Go runs on the cluster and reads that stream. The Pi keeps no state, so reflashing loses nothing.
 
 ```sh
 # Find the mic's name, then set it as `device` in systems/rpi/settings/mic-stream.nix
-ssh marco@rpi-1.local arecord -l
+ssh marco@rpi-1.local.casasulgorgo.net arecord -l
 
 # Listen from the Mac
-nix shell nixpkgs#ffmpeg -c ffplay -rtsp_transport tcp rtsp://rpi-1.local:8554/mic
+nix shell nixpkgs#ffmpeg -c ffplay -rtsp_transport tcp rtsp://rpi-1.local.casasulgorgo.net:8554/mic
 ```
 
 ### BME280
 
-Wired to the GPIO header (VIN pin 1, GND pin 6, SDA pin 3, SCL pin 5). The Pi serves its readings as JSON on `http://rpi-1.local:9280`, for Home Assistant's REST integration:
+Wired to the GPIO header (VIN pin 1, GND pin 6, SDA pin 3, SCL pin 5). The Pi serves its readings as JSON on `http://rpi-1.local.casasulgorgo.net:9280`, for Home Assistant's REST integration:
 
 ```sh
-curl http://rpi-1.local:9280
+curl http://rpi-1.local.casasulgorgo.net:9280
 # {"temperature": 21.43, "humidity": 48.12, "pressure": 1013.25}
 
 # If it answers 503: check the wiring and address (76 or 77)
-ssh marco@rpi-1.local 'sudo i2cdetect -l; journalctl -u bme280'
+ssh marco@rpi-1.local.casasulgorgo.net 'sudo i2cdetect -l; journalctl -u bme280'
 ```
 
 Homebrew runs with `cleanup = "zap"`, so anything not listed in `systems/marco/settings/homebrew.nix` is removed on switch.
