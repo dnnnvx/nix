@@ -27,12 +27,10 @@ in
 
   # The SD image doesn't mount this partition; sops-nix needs it before services start.
   # Root-only, since it holds the key.
+  # No "nofail": the initrd doesn't wait for nofail mounts, so activation would run before the key is there.
   config.fileSystems."/boot/firmware" = {
     neededForBoot = true;
-    options = lib.mkForce [
-      "nofail"
-      "umask=0077"
-    ];
+    options = lib.mkForce [ "umask=0077" ];
   };
 
   # The SSID is a secret too: the repo is public, and a network name can be located on a map
@@ -50,6 +48,8 @@ in
       wifi-security = {
         key-mgmt = "wpa-psk";
         psk = "$WIFI_PSK";
+        # The Pi's brcmfmac chip never associates with the router's WPA2/WPA3 mode with PMF on (1 = disable)
+        pmf = 1;
       };
       ipv4 =
         if address == null then
