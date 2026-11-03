@@ -46,9 +46,6 @@ The Mac builds each Pi's system with its Linux builder (`nix.linux-builder`) and
 To add a Pi, copy `hosts/rpi-1.nix` with a new hostname and add it to `nixosConfigurations` in `flake.nix`. The examples below use `rpi-1`.
 
 ```sh
-# Flash the first image
-nix build .#nixosConfigurations.rpi-1.config.system.build.sdImage
-
 # Deploy
 nixos-rebuild switch --flake .#rpi-1 --target-host marco@rpi-1.local --sudo
 
@@ -58,6 +55,31 @@ nixos-rebuild test --flake .#rpi-1 --target-host marco@rpi-1.local --sudo
 # Roll back
 ssh marco@rpi-1.local sudo nixos-rebuild switch --rollback
 ```
+
+### Flashing a new Pi
+
+Needs `systems/rpi/secrets.yaml` (see Wi-Fi) and every new file added to git, since flakes only see tracked files.
+
+```sh
+HOST=rpi-1
+
+# Build the SD card image (compressed .img.zst)
+nix build .#nixosConfigurations.$HOST.config.system.build.sdImage
+nix shell nixpkgs#zstd -c zstd -d result/sd-image/*.img.zst -o $HOME/Downloads/$HOST.img
+
+# Find the card by its size. Check twice: dd overwrites whatever disk it's given
+diskutil list
+DISK=disk4
+diskutil unmountDisk /dev/$DISK
+sudo dd if=$HOME/Downloads/$HOST.img of=/dev/r$DISK bs=4M status=progress
+
+# macOS then mounts the card's FIRMWARE partition (replug the card if not): give the Pi the age key
+cp ~/.config/sops/age/keys.txt /Volumes/FIRMWARE/sops-age.key
+diskutil eject /dev/$DISK
+rm $HOME/Downloads/$HOST.img
+```
+
+The first boot expands the filesystem and joins Wi-Fi in a minute or two; then `ssh marco@$HOST.local`.
 
 ### Wi-Fi
 
@@ -74,13 +96,6 @@ With this content:
 wifi: |
   WIFI_SSID=your-network
   WIFI_PSK=your-password
-```
-
-After flashing, the card's `FIRMWARE` partition shows up on the Mac:
-
-```sh
-cp ~/.config/sops/age/keys.txt /Volumes/FIRMWARE/sops-age.key
-diskutil eject /Volumes/FIRMWARE
 ```
 
 ### Mic stream
