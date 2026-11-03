@@ -27,10 +27,13 @@ in
 
   # The SD image doesn't mount this partition; sops-nix needs it before services start.
   # Root-only, since it holds the key.
-  # No "nofail": the initrd doesn't wait for nofail mounts, so activation would run before the key is there.
+  # mkForce drops the image's "nofail" "noauto"
   config.fileSystems."/boot/firmware" = {
     neededForBoot = true;
-    options = lib.mkForce [ "umask=0077" ];
+    options = lib.mkForce [
+      "x-initrd.mount"
+      "umask=0077"
+    ];
   };
 
   # The SSID is a secret too: the repo is public, and a network name can be located on a map
