@@ -73,7 +73,13 @@
           {
             nixpkgs = {
               hostPlatform = system;
-              config.allowUnfree = true;
+              config = {
+                allowUnfree = true;
+                # Radicle's node protocol is unencrypted and peer auth is spoofable, which only
+                # breaks private repos; publish public ones only.
+                # Exact version on purpose: a newer still-flagged release fails again and gets re-checked.
+                permittedInsecurePackages = [ "radicle-node-1.10.3" ];
+              };
             };
 
             home-manager = {
