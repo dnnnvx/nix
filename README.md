@@ -45,6 +45,8 @@ The Mac builds each Pi's system with its Linux builder (`nix.linux-builder`) and
 
 To add a Pi, copy `hosts/rpi-1.nix` with a new hostname and add it to `nixosConfigurations` in `flake.nix`. The examples below use `rpi-1`.
 
+Each Pi has a static IP, `rpi.address` in its host file (`rpi-N` → `192.168.0.11N`, outside the router's DHCP pool), and a matching `rpi-N.local.casasulgorgo.net` record in the infra repo (tofu `local_hosts`). Leave `rpi.address` unset for DHCP. `rpi-N.local` (mDNS) works either way.
+
 ```sh
 # Deploy
 nixos-rebuild switch --flake .#rpi-1 --target-host marco@rpi-1.local --sudo
