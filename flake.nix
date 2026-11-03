@@ -25,6 +25,13 @@
       url = "github:can1357/oh-my-pi";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Stable, so `nix flake update nixpkgs` on the Mac doesn't redeploy the Pi
+    nixpkgs-rpi.url = "github:NixOS/nixpkgs/nixos-26.05";
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs-rpi";
+    };
   };
 
   outputs =
@@ -33,11 +40,27 @@
       home-manager,
       nix-homebrew,
       nixpkgs,
+      nixpkgs-rpi,
+      sops-nix,
       ...
     }:
     let
       system = "aarch64-darwin";
       user = "marco";
+
+      mkRpi =
+        host:
+        nixpkgs-rpi.lib.nixosSystem {
+          specialArgs = { inherit inputs user; };
+
+          modules = [
+            "${nixpkgs-rpi}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
+            sops-nix.nixosModules.sops
+            ./systems/rpi
+            host
+            { nixpkgs.hostPlatform = "aarch64-linux"; }
+          ];
+        };
     in
     {
       darwinConfigurations.Marcos-MacBook-Pro = nix-darwin.lib.darwinSystem {
@@ -69,6 +92,11 @@
             };
           }
         ];
+      };
+
+      # Deployed from the Mac: nixos-rebuild switch --flake .#<name> --target-host marco@<name>.local --sudo
+      nixosConfigurations = {
+        rpi-1 = mkRpi ./systems/rpi/hosts/rpi-1.nix;
       };
 
       formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-tree;

@@ -1,0 +1,9 @@
+keys:
+  # ~/.config/sops/age/keys.txt, the Pis get a copy on its own storage
+  - &marco age1ux5r4vxfwn0uyx7d77j6x449k4zl4y302taj4a73q4722c89jdrsr98r36
+
+creation_rules:
+  - path_regex: systems/rpi/secrets\.yaml$
+    key_groups:
+      - age:
+          - *marco

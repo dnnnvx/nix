@@ -20,6 +20,8 @@ in
   home.sessionVariables = {
     PAGER = "less";
     CLICOLOR = 1;
+    # sops on macOS otherwise looks in ~/Library/Application Support
+    SOPS_AGE_KEY_FILE = "$HOME/.config/sops/age/keys.txt";
   };
 
   # binaries installed via `cargo install`
@@ -49,6 +51,10 @@ in
     lazygit
     rustup
     kubie
+    sops # edit encrypted secrets, e.g. systems/rpi/secrets.yaml
+    age
+    ssh-to-age # turn a host's SSH key into its age key
+    nixos-rebuild # deploy the Raspberry Pis from here
     podman # run `podman machine init && podman machine start` once to create the VM
     inputs.pi.packages.${system}.default
     inputs.oh-my-pi.packages.${system}.default

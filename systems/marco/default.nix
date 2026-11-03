@@ -31,6 +31,8 @@
       options = "--delete-older-than 30d";
     };
     optimise.automatic = true;
+    # Local aarch64-linux VM, used to build the Pi's system
+    linux-builder.enable = true;
     settings = {
       experimental-features = [
         "nix-command"
