@@ -26,7 +26,6 @@
     ];
 
     casks = [
-      "kaku"
       "claude-code@latest"
       "asyar"
       "gortex"
