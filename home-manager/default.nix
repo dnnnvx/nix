@@ -54,7 +54,8 @@ in
     sops # edit encrypted secrets, e.g. systems/rpi/secrets.yaml
     age
     ssh-to-age # turn a host's SSH key into its age key
-    nixos-rebuild # deploy the Raspberry Pis from here
+    inputs.deploy-rs.packages.${system}.default # deploy the Raspberry Pis from here (`deploy .`); pinned in flake.nix
+    nixos-rebuild # fallback for deploying a Pi by hand
     podman # run `podman machine init && podman machine start` once to create the VM
     radicle-node # rad, git-remote-rad and the local node; insecure-permitted in flake.nix
     inputs.pi.packages.${system}.default

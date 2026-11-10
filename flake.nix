@@ -32,16 +32,23 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs-rpi";
     };
+    deploy-rs = {
+      # Tagged release; the CLI and the Pi's activation tool both come from here so they always match
+      url = "github:serokell/deploy-rs/v1.0.0";
+      inputs.nixpkgs.follows = "nixpkgs-rpi";
+    };
   };
 
   outputs =
     inputs@{
+      self,
       nix-darwin,
       home-manager,
       nix-homebrew,
       nixpkgs,
       nixpkgs-rpi,
       sops-nix,
+      deploy-rs,
       ...
     }:
     let
@@ -61,6 +68,7 @@
             { nixpkgs.hostPlatform = "aarch64-linux"; }
           ];
         };
+
     in
     {
       darwinConfigurations.Marcos-MacBook-Pro = nix-darwin.lib.darwinSystem {
@@ -100,10 +108,22 @@
         ];
       };
 
-      # Deployed from the Mac: nixos-rebuild switch --flake .#<name> --target-host marco@<name>.local.casasulgorgo.net --sudo
       nixosConfigurations = {
         rpi-1 = mkRpi ./systems/rpi/hosts/rpi-1.nix;
       };
+
+      # Deployed from the Mac: `deploy .` for every Pi, `deploy .#rpi-1` for one.
+      deploy.nodes = builtins.mapAttrs (name: cfg: {
+        hostname = "${name}.local.casasulgorgo.net";
+        sshUser = user;
+        profiles.system = {
+          user = "root";
+          path = deploy-rs.lib.aarch64-linux.activate.nixos cfg;
+        };
+      }) self.nixosConfigurations;
+
+      # `nix flake check` validates the deploy config and builds every Pi
+      checks.${system} = deploy-rs.lib.${system}.deployChecks self.deploy;
 
       formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-tree;
     };
