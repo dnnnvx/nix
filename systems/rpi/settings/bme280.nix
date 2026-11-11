@@ -2,8 +2,8 @@
 
 let
   port = 9280;
-  # 0x76, or 0x77 if the board's SDO pin is high: check with `sudo i2cdetect -y <bus>`
-  address = "76";
+  # Seengreat board default (ADDR pin high); 0x76 if ADDR is tied to GND. Check with `sudo i2cdetect -y <bus>`
+  address = "77";
 
   # One run per HTTP request: answers with the current readings as JSON, for Home Assistant
   readings = pkgs.writeShellScript "bme280-http" ''
