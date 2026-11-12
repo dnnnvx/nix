@@ -32,7 +32,10 @@
 
   users.users.${user} = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ];
+    extraGroups = [
+      "wheel"
+      "audio" # arecord/alsamixer over SSH
+    ];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGDeA1xLN3r9IS6OKcYnMN/8SJ/nB7oh7TggL3TyCgn+"
     ];

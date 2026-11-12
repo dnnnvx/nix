@@ -2,9 +2,9 @@
 
 let
   port = 8554;
-  # ALSA input. Once the mic is plugged in, find its name with `arecord -l`
-  # and use e.g. "plughw:CARD=Device"; "default" may pick HDMI audio instead.
-  device = "default";
+  # ALSA input: the C-Media USB PnP Sound Device (`arecord -l`). Addressed by
+  # card name, since card indices can change between boots.
+  device = "plughw:CARD=Device";
 in
 {
   # Streams the mic as rtsp://<hostname>.local:8554/mic for BirdNET-Go on the cluster
