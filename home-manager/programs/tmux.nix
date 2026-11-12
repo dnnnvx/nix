@@ -1,6 +1,8 @@
-{ ... }: {
+{ pkgs, ... }: {
   programs.tmux = {
     enable = true;
+    # C-h/j/k/l (no prefix) move across tmux panes and nvim splits; pairs with nvim's tmux-navigator
+    plugins = [ pkgs.tmuxPlugins.vim-tmux-navigator ];
     keyMode = "vi";
     prefix = "C-u";
     terminal = "tmux-256color";
@@ -17,6 +19,12 @@
       set -as terminal-overrides ",*:RGB"
 
       set -g renumber-windows on
+
+      # nvim reloads files edited by Claude Code on FocusGained
+      set -g focus-events on
+      # pass modified keys (e.g. shift-enter for a newline in Claude Code) through to apps
+      set -s extended-keys on
+      set -as terminal-features 'xterm*:extkeys'
 
       bind h select-pane -L
       bind j select-pane -D

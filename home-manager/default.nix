@@ -7,9 +7,11 @@ in
   home.stateVersion = "25.05";
 
   imports = [
+    ./programs/ghostty.nix
     ./programs/git.nix
     ./programs/helix.nix
     ./programs/kubectl.nix
+    ./programs/nvim.nix
     ./programs/ssh.nix
     ./programs/starship.nix
     ./programs/tmux.nix

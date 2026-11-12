@@ -17,6 +17,11 @@
 
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
 
+    nixvim = {
+      url = "github:nix-community/nixvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     pi = {
       url = "github:earendil-works/pi/stable";
       inputs.nixpkgs.follows = "nixpkgs";
