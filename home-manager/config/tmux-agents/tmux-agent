@@ -1,0 +1,123 @@
+#!/bin/sh
+# tmux-agent: glue between tmux workspaces (one session per project folder)
+# and Claude Code. Adapted from a friend's kit, trimmed to the core.
+#
+#   tmux-agent open [dir]                         open or switch to the workspace for a folder (default: $PWD)
+#   tmux-agent state working|waiting|done|clear   called from Claude Code hooks
+#   tmux-agent demo                               fake agent in a background tab, to test the markers
+
+set -u
+
+msg() {
+  if [ -n "${TMUX:-}" ]; then tmux display-message -d 4000 "tmux-agent: $*"
+  else echo "tmux-agent: $*" >&2; fi
+}
+die() { msg "$*"; exit 1; }
+
+# ---------------------------------------------------------------- workspaces
+cmd_open() {
+  dir=${1:-$PWD}
+  [ -d "$dir" ] || die "no such folder: $dir"
+  dir=$(cd "$dir" && pwd)
+
+  # session names can't contain . or :
+  name=$(basename "$dir" | tr '.:' '__')
+  have=$(tmux display -p -t "=$name:" '#{session_path}' 2>/dev/null)
+  if [ -n "$have" ] && [ "$have" != "$dir" ]; then        # same folder name elsewhere
+    name=$(basename "$(dirname "$dir")" | tr '.:' '__')-$name
+    have=$(tmux display -p -t "=$name:" '#{session_path}' 2>/dev/null)
+  fi
+  [ -n "$have" ] || tmux new-session -d -s "$name" -c "$dir" || die "could not create $name"
+
+  if [ -n "${TMUX:-}" ]; then
+    tmux switch-client -t "=$name"
+  else
+    exec tmux attach -t "=$name"
+  fi
+}
+
+# ---------------------------------------------------------------- agent state
+# True if this process descends from pid $1. Guards against hooks from agents
+# that are not running in that pane (e.g. background sessions that inherited
+# a stale $TMUX_PANE).
+descends_from() {
+  p=$$
+  while [ -n "$p" ] && [ "$p" -gt 1 ] 2>/dev/null; do
+    [ "$p" = "$1" ] && return 0
+    p=$(ps -o ppid= -p "$p" 2>/dev/null | tr -d ' ')
+  done
+  return 1
+}
+
+# setting a user option doesn't redraw the status line by itself
+refresh_bars() {
+  tmux list-clients -F '#{client_name}' | while read -r c; do tmux refresh-client -S -t "$c"; done
+}
+
+notify() {   # $1 = waiting|done
+  case $1 in waiting) what='needs you' ;; *) what='is done' ;; esac
+  text="$(tmux display -p -t "$TMUX_PANE" '#{session_name} › #{window_name}'): claude $what"
+
+  # tmux message on every client that isn't already looking at this pane
+  tmux list-clients -F '#{client_name}|#{pane_id}' | while IFS='|' read -r c p; do
+    [ "$p" = "$TMUX_PANE" ] || tmux display-message -c "$c" "$text"
+  done
+
+  # macOS notification only when no tmux client has focus (you're in another app)
+  tmux list-clients -F '#{client_flags}' | grep -q focused && return 0
+  text=$(printf '%s' "$text" | tr -d '"\\')
+  osascript -e "display notification \"$text\" with title \"tmux\""
+}
+
+cmd_state() {
+  new=${1:-}
+  exec >/dev/null 2>&1   # hooks must stay silent (UserPromptSubmit stdout becomes model context)
+  [ -n "${TMUX_PANE:-}" ] || exit 0
+  case $new in working|waiting|done|clear) ;; *) exit 0 ;; esac
+
+  IFS='|' read -r pid tty cur visible <<EOF
+$(tmux display -p -t "$TMUX_PANE" '#{pane_pid}|#{pane_tty}|#{@agent}|#{?#{&&:#{pane_active},#{&&:#{window_active},#{session_attached}}},1,0}' 2>/dev/null)
+EOF
+  [ -n "${pid:-}" ] || exit 0
+  [ "$new" = "$cur" ] && exit 0            # no change: keeps PostToolUse hooks cheap
+  descends_from "$pid" || exit 0
+
+  # "done" in the pane you're already looking at isn't news; don't leave a marker
+  if [ "$new" = clear ] || { [ "$new" = done ] && [ "$visible" = 1 ]; }; then
+    tmux set -p -t "$TMUX_PANE" -u @agent
+    refresh_bars
+    exit 0
+  fi
+
+  tmux set -p -t "$TMUX_PANE" @agent "$new"
+  refresh_bars
+  case $new in
+    waiting|done)
+      [ -w "$tty" ] && printf '\a' >"$tty"   # flags the tab (bell)
+      notify "$new" ;;
+  esac
+  exit 0
+}
+
+# ---------------------------------------------------------------- demo
+# A fake agent in a background tab: working -> waiting -> working -> done.
+# awk is the foreground process, so tmux treats it like a real agent.
+cmd_demo() {
+  self=$(cd "$(dirname "$0")" && pwd)/$(basename "$0")
+  tmux new-window -d -n agent-demo "awk 'BEGIN {
+    a = \"$self state \"
+    print \"demo agent: working\"; fflush(); system(a \"working\"); system(\"sleep 5\")
+    print \"demo agent: waiting on you\"; fflush(); system(a \"waiting\"); system(\"sleep 10\")
+    print \"demo agent: working again\"; fflush(); system(a \"working\"); system(\"sleep 3\")
+    print \"demo agent: done (close this tab when finished)\"; fflush(); system(a \"done\"); system(\"sleep 3600\") }'" ||
+    die "could not start the demo (are you inside tmux?)"
+  echo "demo agent started in background tab 'agent-demo':"
+  echo "  grey (working, 5s) -> red (waiting, 10s) -> grey -> green (done)"
+}
+
+case ${1:-} in
+  open)  shift; cmd_open "$@" ;;
+  state) shift; cmd_state "$@" ;;
+  demo)  cmd_demo ;;
+  *) sed -n '5,8p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+esac

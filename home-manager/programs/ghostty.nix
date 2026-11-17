@@ -11,7 +11,8 @@
       font-size = 14;
       window-padding-x = 8;
       window-padding-y = 4;
-      macos-option-as-alt = true;
+      # left Option is Alt (tmux's Alt+1…9); right Option still types @ # [ ] { } on the Italian layout
+      macos-option-as-alt = "left";
       macos-titlebar-style = "tabs";
       cursor-style-blink = false;
       confirm-close-surface = false;

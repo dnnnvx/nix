@@ -15,6 +15,7 @@ in
     ./programs/ssh.nix
     ./programs/starship.nix
     ./programs/tmux.nix
+    ./programs/tmux-agents.nix
     ./programs/zed.nix
     ./programs/zsh.nix
   ];
