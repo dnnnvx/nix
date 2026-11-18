@@ -79,6 +79,7 @@ in
   programs.zoxide = {
     enable = true;
     enableZshIntegration = true;
+    options = [ "--cmd" "cd" ]; # replaces cd (and adds cdi)
   };
 
   programs.bat.enable = true;
