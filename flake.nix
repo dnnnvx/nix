@@ -115,6 +115,7 @@
 
       nixosConfigurations = {
         rpi-1 = mkRpi ./systems/rpi/hosts/rpi-1.nix;
+        rpi-2 = mkRpi ./systems/rpi/hosts/rpi-2.nix;
       };
 
       # Deployed from the Mac: `deploy .` for every Pi, `deploy .#rpi-1` for one.
