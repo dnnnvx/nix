@@ -26,10 +26,6 @@
       url = "github:earendil-works/pi/stable";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    oh-my-pi = {
-      url = "github:can1357/oh-my-pi";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
 
     # Stable, so `nix flake update nixpkgs` on the Mac doesn't redeploy the Pi
     nixpkgs-rpi.url = "github:NixOS/nixpkgs/nixos-26.05";

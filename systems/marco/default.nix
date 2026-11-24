@@ -32,7 +32,15 @@
     };
     optimise.automatic = true;
     # Local aarch64-linux VM, used to build the Pi's system
-    linux-builder.enable = true;
+    linux-builder = {
+      enable = true;
+      maxJobs = 4;
+      config.virtualisation = {
+        cores = pkgs.lib.mkForce 6;
+        memorySize = pkgs.lib.mkForce (8 * 1024);
+        diskSize = pkgs.lib.mkForce (40 * 1024);
+      };
+    };
     settings = {
       experimental-features = [
         "nix-command"

@@ -62,7 +62,6 @@ in
     podman # run `podman machine init && podman machine start` once to create the VM
     radicle-node # rad, git-remote-rad and the local node; insecure-permitted in flake.nix
     inputs.pi.packages.${system}.default
-    inputs.oh-my-pi.packages.${system}.default
   ];
 
   programs.fzf = {
