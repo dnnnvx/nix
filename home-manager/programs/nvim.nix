@@ -17,7 +17,7 @@
 
     opts = {
       number = true;
-      relativenumber = true;
+      relativenumber = false;
       signcolumn = "yes";
       cursorline = true;
       scrolloff = 8;
@@ -156,6 +156,7 @@
         (lua "<leader>e" "Snacks.explorer()" "File tree sidebar")
         (lua "<leader>gg" "Snacks.lazygit()" "Lazygit")
         (lua "<leader>gd" "Snacks.picker.git_diff()" "Git diff hunks")
+        (lua "<leader>n" "vim.wo.relativenumber = not vim.wo.relativenumber" "Toggle relative numbers")
         {
           mode = "n";
           key = "<leader>as";

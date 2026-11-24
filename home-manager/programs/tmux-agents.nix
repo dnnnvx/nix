@@ -23,6 +23,19 @@ in
       if (( $# == 0 )); then ~/.config/tmux/bin/tmux-agent open "$PWD"
       else command tmux "$@"; fi
     }
+    # `dev`          workspace for this folder (or jump back to it)
+    # `dev <dir>`    workspace for that folder
+    # `dev <query>`  zoxide's best match, e.g. `dev nix`
+    # `dev -`        fzf picker over zoxide's known folders
+    dev() {
+      local d
+      if (( $# == 0 )); then d=$PWD
+      elif [[ $1 == - ]]; then d=$(zoxide query -l | fzf --prompt='dev> ') || return
+      elif [[ -d $1 ]]; then d=$1
+      else d=$(zoxide query -- "$@") || { echo "dev: no match for $*" >&2; return 1; }
+      fi
+      ~/.config/tmux/bin/tmux-agent open "$d"
+    }
   '';
 
   # Claude Code (and Gortex) write ~/.claude/settings.json themselves, so it
