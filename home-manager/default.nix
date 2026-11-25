@@ -7,6 +7,7 @@ in
   home.stateVersion = "25.11";
 
   imports = [
+    ./programs/agents.nix
     ./programs/ghostty.nix
     ./programs/git.nix
     ./programs/helix.nix
