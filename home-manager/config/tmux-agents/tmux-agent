@@ -3,6 +3,7 @@
 # and Claude Code. Adapted from a friend's kit, trimmed to the core.
 #
 #   tmux-agent open [dir]                         open or switch to the workspace for a folder (default: $PWD)
+#   tmux-agent ide [dir]                          same, but a new workspace gets tabs nvim | claude | term
 #   tmux-agent state working|waiting|done|clear   called from Claude Code hooks
 #   tmux-agent demo                               fake agent in a background tab, to test the markers
 
@@ -15,8 +16,9 @@ msg() {
 die() { msg "$*"; exit 1; }
 
 # ---------------------------------------------------------------- workspaces
-cmd_open() {
-  dir=${1:-$PWD}
+cmd_open() {   # $1 = plain|ide, $2 = dir
+  layout=$1
+  dir=${2:-$PWD}
   [ -d "$dir" ] || die "no such folder: $dir"
   dir=$(cd "$dir" && pwd)
 
@@ -27,7 +29,19 @@ cmd_open() {
     name=$(basename "$(dirname "$dir")" | tr '.:' '__')-$name
     have=$(tmux display -p -t "=$name:" '#{session_path}' 2>/dev/null)
   fi
-  [ -n "$have" ] || tmux new-session -d -s "$name" -c "$dir" || die "could not create $name"
+  if [ -z "$have" ]; then
+    if [ "$layout" = ide ]; then
+      # commands are typed into a shell, so quitting nvim/claude leaves a prompt in that tab
+      tmux new-session -d -s "$name" -c "$dir" -n nvim || die "could not create $name"
+      tmux send-keys -t "=$name:1" nvim Enter
+      tmux new-window -d -t "=$name:2" -c "$dir" -n claude
+      tmux send-keys -t "=$name:2" claude Enter
+      tmux new-window -d -t "=$name:3" -c "$dir" -n term
+      tmux select-window -t "=$name:1"
+    else
+      tmux new-session -d -s "$name" -c "$dir" || die "could not create $name"
+    fi
+  fi
 
   if [ -n "${TMUX:-}" ]; then
     tmux switch-client -t "=$name"
@@ -116,8 +130,9 @@ cmd_demo() {
 }
 
 case ${1:-} in
-  open)  shift; cmd_open "$@" ;;
+  open)  shift; cmd_open plain "$@" ;;
+  ide)   shift; cmd_open ide "$@" ;;
   state) shift; cmd_state "$@" ;;
   demo)  cmd_demo ;;
-  *) sed -n '5,8p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+  *) sed -n '5,9p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac

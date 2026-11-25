@@ -23,7 +23,8 @@ in
       if (( $# == 0 )); then ~/.config/tmux/bin/tmux-agent open "$PWD"
       else command tmux "$@"; fi
     }
-    # `dev`          workspace for this folder (or jump back to it)
+    # `dev`          workspace for this folder (or jump back to it); a new one
+    #                gets tabs 1 nvim, 2 claude, 3 terminal
     # `dev <dir>`    workspace for that folder
     # `dev <query>`  zoxide's best match, e.g. `dev nix`
     # `dev -`        fzf picker over zoxide's known folders
@@ -34,7 +35,7 @@ in
       elif [[ -d $1 ]]; then d=$1
       else d=$(zoxide query -- "$@") || { echo "dev: no match for $*" >&2; return 1; }
       fi
-      ~/.config/tmux/bin/tmux-agent open "$d"
+      ~/.config/tmux/bin/tmux-agent ide "$d"
     }
   '';
 
