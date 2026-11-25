@@ -4,6 +4,9 @@
 #
 #   tmux-agent open [dir]                         open or switch to the workspace for a folder (default: $PWD)
 #   tmux-agent ide [dir]                          same, but a new workspace gets tabs nvim | claude | term
+#   tmux-agent pick                               fzf over zoxide's folders, then ide (M-o popup)
+#   tmux-agent scratch <workspace>                per-workspace floating terminal (M-s popup)
+#   tmux-agent git [dir]                          branch + dirty marker for the status bar
 #   tmux-agent state working|waiting|done|clear   called from Claude Code hooks
 #   tmux-agent demo                               fake agent in a background tab, to test the markers
 
@@ -37,6 +40,7 @@ cmd_open() {   # $1 = plain|ide, $2 = dir
       tmux new-window -d -t "=$name:2" -c "$dir" -n claude
       tmux send-keys -t "=$name:2" claude Enter
       tmux new-window -d -t "=$name:3" -c "$dir" -n term
+      tmux split-window -d -v -l 30% -t "=$name:3" -c "$dir"   # small pane for tests / logs
       tmux select-window -t "=$name:1"
     else
       tmux new-session -d -s "$name" -c "$dir" || die "could not create $name"
@@ -47,6 +51,34 @@ cmd_open() {   # $1 = plain|ide, $2 = dir
     tmux switch-client -t "=$name"
   else
     exec tmux attach -t "=$name"
+  fi
+}
+
+cmd_pick() {
+  d=$(zoxide query -l | fzf --prompt='dev> ' --reverse) || exit 0
+  cmd_open ide "$d"
+}
+
+# Runs inside a popup. The scratch session is hidden from the status bar and
+# trees (leading _), has no status bar of its own, and closing its last shell
+# just closes the popup instead of falling through to another workspace.
+cmd_scratch() {
+  s="_scratch-${1:?workspace name}"
+  if ! tmux has-session -t "=$s" 2>/dev/null; then
+    tmux new-session -d -s "$s" -c "$PWD" || die "could not create $s"
+    tmux set -t "=$s:" status off
+    tmux set -t "=$s:" detach-on-destroy on
+  fi
+  exec env -u TMUX tmux attach -t "=$s"
+}
+
+cmd_git() {
+  cd "${1:-.}" 2>/dev/null || exit 0
+  b=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null) || exit 0
+  if [ -n "$(git status --porcelain 2>/dev/null | head -n 1)" ]; then
+    printf '#[fg=#adbac7] %s #[fg=#ff9e64]●' "$b"
+  else
+    printf '#[fg=#adbac7] %s' "$b"
   fi
 }
 
@@ -132,7 +164,10 @@ cmd_demo() {
 case ${1:-} in
   open)  shift; cmd_open plain "$@" ;;
   ide)   shift; cmd_open ide "$@" ;;
+  pick)  cmd_pick ;;
+  scratch) shift; cmd_scratch "$@" ;;
+  git)   shift; cmd_git "$@" ;;
   state) shift; cmd_state "$@" ;;
   demo)  cmd_demo ;;
-  *) sed -n '5,9p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+  *) sed -n '5,12p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac

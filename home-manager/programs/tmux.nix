@@ -47,8 +47,10 @@
       set -g status-position bottom
       set -g status-bg colour234
       set -g status-fg colour137
-      set -g status-right '#[fg=colour233,bg=colour241,bold] %d/%m #[fg=colour233,bg=colour245,bold] %H:%M:%S '
-      set -g status-right-length 50
+      # git branch of the workspace folder (● = uncommitted changes), refreshed every 5s
+      set -g status-interval 5
+      set -g status-right '#(~/.config/tmux/bin/tmux-agent git "#{session_path}") #[fg=colour233,bg=colour241,bold] %d/%m #[fg=colour233,bg=colour245,bold] %H:%M:%S '
+      set -g status-right-length 80
       # status-left and window formats live in tmux-agents.nix (workspaces + Claude markers)
     '';
   };
