@@ -5,7 +5,7 @@
 #   tmux-agent open [dir]                         open or switch to the workspace for a folder (default: $PWD)
 #   tmux-agent ide [dir]                          same, but a new workspace gets tabs nvim | claude | term
 #   tmux-agent pick                               fzf over zoxide's folders, then ide (M-o popup)
-#   tmux-agent scratch <workspace>                per-workspace floating terminal (M-s popup)
+#   tmux-agent scratch [workspace]                per-workspace floating terminal (M-s popup)
 #   tmux-agent git [dir]                          branch + dirty marker for the status bar
 #   tmux-agent state working|waiting|done|clear   called from Claude Code hooks
 #   tmux-agent demo                               fake agent in a background tab, to test the markers
@@ -62,7 +62,10 @@ cmd_pick() {
 # trees (leading _), has no status bar of its own, and closing its last shell
 # just closes the popup instead of falling through to another workspace.
 cmd_scratch() {
-  s="_scratch-${1:?workspace name}"
+  ws=${1:-$(tmux display -p '#{session_name}')}   # popups don't expand #{} in their command
+  ws=${ws#_scratch-}
+  [ -n "$ws" ] || die "scratch: no workspace"
+  s="_scratch-$ws"
   if ! tmux has-session -t "=$s" 2>/dev/null; then
     tmux new-session -d -s "$s" -c "$PWD" || die "could not create $s"
     tmux set -t "=$s:" status off
