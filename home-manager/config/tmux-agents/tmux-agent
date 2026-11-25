@@ -40,7 +40,6 @@ cmd_open() {   # $1 = plain|ide, $2 = dir
       tmux new-window -d -t "=$name:2" -c "$dir" -n claude
       tmux send-keys -t "=$name:2" claude Enter
       tmux new-window -d -t "=$name:3" -c "$dir" -n term
-      tmux split-window -d -v -l 30% -t "=$name:3" -c "$dir"   # small pane for tests / logs
       tmux select-window -t "=$name:1"
     else
       tmux new-session -d -s "$name" -c "$dir" || die "could not create $name"
