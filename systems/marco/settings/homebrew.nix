@@ -28,7 +28,6 @@
     casks = [
       "claude-code@latest"
       "asyar"
-      "gortex"
       "sable"
     ];
 

@@ -39,7 +39,7 @@ in
     }
   '';
 
-  # Claude Code (and Gortex) write ~/.claude/settings.json themselves, so it
+  # Claude Code writes ~/.claude/settings.json themselves, so it
   # can't be a read-only link into the store. Merge our hooks in instead:
   # replaces only entries mentioning tmux-agent, keeps everything else, and
   # leaves the file alone when nothing would change. Running sessions pick the
