@@ -42,6 +42,7 @@ in
     unzip
     p7zip
     ripgrep
+    fd
     yq-go
     dnsutils
     ldns # replacement of `dig`, it provide the command `drill`
