@@ -2,6 +2,7 @@
   programs.tmux = {
     enable = true;
     # C-h/j/k/l (no prefix) move across tmux panes and nvim splits; pairs with nvim's tmux-navigator
+    # (C-l is unbound in extraConfig so shells keep it for clear)
     plugins = [ pkgs.tmuxPlugins.vim-tmux-navigator ];
     keyMode = "vi";
     prefix = "C-u";
@@ -36,6 +37,13 @@
       bind C-k resize-pane -U 3
       bind C-l resize-pane -R 3
       bind C-h resize-pane -L 3
+
+      # give C-l back to the shell (clear); nvim's navigator still jumps right from vim
+      unbind -n C-l
+
+      # previous/next window without the prefix
+      bind -n M-h previous-window
+      bind -n M-l next-window
 
       bind '"' split-window -c "#{pane_current_path}"
       bind % split-window -h -c "#{pane_current_path}"
