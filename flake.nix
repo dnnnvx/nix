@@ -27,6 +27,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Code-graph MCP server, trialled in infra via its .mcp.json; pinned to a tag
+    codebase-memory-mcp = {
+      url = "github:DeusData/codebase-memory-mcp/v0.12.1";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Stable, so `nix flake update nixpkgs` on the Mac doesn't redeploy the Pi
     nixpkgs-rpi.url = "github:NixOS/nixpkgs/nixos-26.05";
     sops-nix = {
