@@ -83,6 +83,8 @@ in
         enable = true;
         settings = {
           picker.enabled = true;
+          # Show dotfiles in the sidebar only; H toggles them, I toggles gitignored files
+          picker.sources.explorer.hidden = true;
           explorer.enabled = true;
           lazygit.enabled = true;
           indent.enabled = true;
