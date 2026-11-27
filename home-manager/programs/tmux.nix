@@ -57,11 +57,12 @@ in
       bind-key -T copy-mode-vi 'y' send -X copy-pipe-and-cancel "pbcopy"
 
       set -g status-position bottom
-      set -g status-bg ${p.bg-raised}
-      set -g status-fg ${p.yellow}
+      # colours must be quoted: an unquoted #rrggbb starts a tmux comment
+      set -g status-style 'bg=${p.bg-raised},fg=${p.fg}'
+      setw -g window-status-current-style 'bg=${p.selection}'
       # git branch of the workspace folder (● = uncommitted changes), refreshed every 5s
       set -g status-interval 5
-      set -g status-right '#(~/.config/tmux/bin/tmux-agent git "#{session_path}") #[fg=${p.bg},bg=${p.fg-subtle},bold] %d/%m #[fg=${p.bg},bg=${p.fg-muted},bold] %H:%M:%S '
+      set -g status-right '#(~/.config/tmux/bin/tmux-agent git "#{session_path}")#[default] #[bg=${p.selection},fg=${p.blue},bold] %d/%m #[default] #[bg=${p.selection},fg=${p.cyan},bold] %H:%M:%S '
       set -g status-right-length 80
       # status-left and window formats live in tmux-agents.nix (workspaces + Claude markers)
     '';

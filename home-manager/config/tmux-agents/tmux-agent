@@ -78,9 +78,9 @@ cmd_git() {
   cd "${1:-.}" 2>/dev/null || exit 0
   b=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null) || exit 0
   if [ -n "$(git status --porcelain 2>/dev/null | head -n 1)" ]; then
-    printf '#[fg={{fg}}] %s #[fg={{orange}}]●' "$b"
+    printf '#[bg={{selection}},fg={{purple}}] %s #[fg={{orange}}]● ' "$b"
   else
-    printf '#[fg={{fg}}] %s' "$b"
+    printf '#[bg={{selection}},fg={{purple}}] %s ' "$b"
   fi
 }
 
