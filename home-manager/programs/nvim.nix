@@ -33,6 +33,16 @@
       updatetime = 250;
       autoread = true;
       clipboard = "unnamedplus"; # share the macOS clipboard
+      # block in every mode; the highlight group after `-` colors it per mode (see highlightOverride)
+      guicursor = "n-c-sm:block-nCursor,i-ci-ve:block-iCursor,v:block-vCursor,r-cr-o:block-rCursor,t:block-TermCursor";
+    };
+
+    # applied after the colorscheme, so it doesn't wipe them; colors from GitHub Dark Dimmed
+    highlightOverride = {
+      nCursor.bg = "#539bf5"; # normal: blue
+      iCursor.bg = "#57ab5a"; # insert: green
+      vCursor.bg = "#b083f0"; # visual: purple
+      rCursor.bg = "#f69d50"; # replace / operator-pending: orange
     };
 
     colorschemes.github-theme = {

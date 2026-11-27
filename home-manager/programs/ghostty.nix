@@ -14,7 +14,10 @@
       # left Option is Alt (tmux's Alt+1…9); right Option still types @ # [ ] { } on the Italian layout
       macos-option-as-alt = "left";
       macos-titlebar-style = "tabs";
+      cursor-style = "block";
       cursor-style-blink = false;
+      # shell integration forces a bar cursor at the prompt; keep everything else it does
+      shell-integration-features = "no-cursor";
       confirm-close-surface = false;
       copy-on-select = "clipboard";
     };
