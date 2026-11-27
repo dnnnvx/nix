@@ -7,12 +7,17 @@
 { lib, pkgs, ... }:
 let
   dir = ../config/tmux-agents;
+  p = import ../palette.nix;
+  # {{name}} in the files below becomes that color from ../palette.nix
+  withPalette = file:
+    builtins.replaceStrings (map (n: "{{${n}}}") (builtins.attrNames p)) (builtins.attrValues p)
+      (builtins.readFile file);
 in
 {
-  programs.tmux.extraConfig = lib.mkAfter (builtins.readFile "${dir}/tmux.conf");
+  programs.tmux.extraConfig = lib.mkAfter (withPalette "${dir}/tmux.conf");
 
   home.file.".config/tmux/bin/tmux-agent" = {
-    source = "${dir}/tmux-agent";
+    text = withPalette "${dir}/tmux-agent";
     executable = true;
   };
 

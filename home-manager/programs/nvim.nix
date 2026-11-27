@@ -1,4 +1,7 @@
 { inputs, ... }:
+let
+  p = import ../palette.nix;
+in
 {
   imports = [ inputs.nixvim.homeModules.nixvim ];
 
@@ -37,17 +40,27 @@
       guicursor = "n-c-sm:block-nCursor,i-ci-ve:block-iCursor,v:block-vCursor,r-cr-o:block-rCursor,t:block-TermCursor";
     };
 
-    # applied after the colorscheme, so it doesn't wipe them; colors from GitHub Dark Dimmed
+    # applied after the colorscheme, so it doesn't wipe them; colors from ../palette.nix
     highlightOverride = {
-      nCursor.bg = "#539bf5"; # normal: blue
-      iCursor.bg = "#57ab5a"; # insert: green
-      vCursor.bg = "#b083f0"; # visual: purple
-      rCursor.bg = "#f69d50"; # replace / operator-pending: orange
+      nCursor.bg = p.blue; # normal
+      iCursor.bg = p.green; # insert
+      vCursor.bg = p.purple; # visual
+      rCursor.bg = p.orange; # replace / operator-pending
     };
 
+    # code colors stay GitHub Dark Dimmed (same as Zed); only the surfaces are swapped for
+    # ../palette.nix's radium ones. Spec names in the plugin's palette/github_dark_dimmed.lua
     colorschemes.github-theme = {
       enable = true;
-      settings.options.transparent = false;
+      settings = {
+        options.transparent = false;
+        specs.github_dark_dimmed = {
+          bg0 = p.bg-inset; # floats, popups
+          bg1 = p.bg; # editor
+          bg2 = p.bg-raised; # colorcolumn, folds
+          sel0 = p.selection; # visual selection
+        };
+      };
     };
     colorscheme = "github_dark_dimmed";
 

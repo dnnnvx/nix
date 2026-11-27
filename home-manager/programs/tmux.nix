@@ -1,4 +1,8 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+let
+  p = import ../palette.nix;
+in
+{
   programs.tmux = {
     enable = true;
     # C-h/j/k/l (no prefix) move across tmux panes and nvim splits; pairs with nvim's tmux-navigator
@@ -53,11 +57,11 @@
       bind-key -T copy-mode-vi 'y' send -X copy-pipe-and-cancel "pbcopy"
 
       set -g status-position bottom
-      set -g status-bg colour234
-      set -g status-fg colour137
+      set -g status-bg ${p.bg-raised}
+      set -g status-fg ${p.yellow}
       # git branch of the workspace folder (● = uncommitted changes), refreshed every 5s
       set -g status-interval 5
-      set -g status-right '#(~/.config/tmux/bin/tmux-agent git "#{session_path}") #[fg=colour233,bg=colour241,bold] %d/%m #[fg=colour233,bg=colour245,bold] %H:%M:%S '
+      set -g status-right '#(~/.config/tmux/bin/tmux-agent git "#{session_path}") #[fg=${p.bg},bg=${p.fg-subtle},bold] %d/%m #[fg=${p.bg},bg=${p.fg-muted},bold] %H:%M:%S '
       set -g status-right-length 80
       # status-left and window formats live in tmux-agents.nix (workspaces + Claude markers)
     '';

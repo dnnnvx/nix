@@ -1,12 +1,27 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
+let
+  p = import ../palette.nix;
+in
 {
   programs.ghostty = {
     enable = true;
     package = pkgs.ghostty-bin; # prebuilt macOS app; `ghostty` in nixpkgs is Linux-only
     enableZshIntegration = true;
 
+    # built from ../palette.nix (ANSI 0-15, normal then bright)
+    themes.palette = {
+      background = p.bg;
+      foreground = p.fg;
+      cursor-color = p.fg;
+      selection-background = p.selection;
+      palette = lib.imap0 (i: c: "${toString i}=${c}") [
+        p.bg p.red p.green p.yellow p.blue p.purple p.cyan p.white
+        p.fg-subtle p.red-bright p.green-bright p.yellow-bright p.blue-bright p.purple-bright p.cyan-bright p.white
+      ];
+    };
+
     settings = {
-      theme = "GitHub Dark Dimmed";
+      theme = "palette";
       font-family = "MonaspiceNe Nerd Font";
       font-size = 14;
       window-padding-x = 8;
